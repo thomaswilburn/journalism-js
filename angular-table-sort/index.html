@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <body>
+    <style>
+[ng-cloak] { display: none }
+.sorted::after { content: " \25B2"; }
+.sorted.desc::after { content: " \25BC"; }
+    </style>
+    <section ng-app="sortableDemo">
+      <table ng-controller="tableController" ng-cloak>
+        <thead>
+          <tr>
+            <th ng-click="sort('name')" sort-column="name">Name
+            <th ng-click="sort('title')" sort-column="title">Title
+            <th ng-click="sort('age')" sort-column="age">Age
+        </thead>
+        <tbody>
+          <tr ng-repeat="row in table">
+            <td>{{row.name}}
+            <td>{{row.title}}
+            <td>{{row.age}}
+        </tbody>
+      </table>
+    </section>
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="sortable.js"></script>
+  </body>
+</html>

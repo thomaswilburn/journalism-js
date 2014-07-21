@@ -1,0 +1,11 @@
+{
+  "name": "angular-table-sort",
+  "version": "0.0.0",
+  "authors": [
+    "Thomas Wilburn <news@thomaswilburn.net>"
+  ],
+  "description": "Demo of sorting tabular data with Angular.",
+  "dependencies": {
+    "angular": "~1.2.20"
+  }
+}
