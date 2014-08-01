@@ -16,5 +16,7 @@ These tutorials assume some basic familiarity with JavaScript--you should know a
 Table of Contents
 -----------------
 
+```
 /angular-table-sort - Creating sortable, filtered tables with AngularJS
 /scraping-by - Intro to Node asynchronicity via web scraping
+```
