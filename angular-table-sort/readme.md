@@ -65,6 +65,9 @@ Unlike other frameworks like Ractive, Angular doesn't require us to write and lo
 
 You'll see within the body, we use `ng-repeat="row in table"` to loop through our data. Then, within each row, we can use the `{{ }}` expression syntax to place each row's data into the page. Expressions like this, where we just provide the values we want for output, are the simplest kind of Angular expressions. It's possible to do much more elaborate filtering and evaluation, but simple templates are the meat-and-potatoes of data visualization.
 
+Sort by Sortwest
+----------------
+
 Now we need to tell our table to sort. On our scope, we'll declare some tracking variables, and a `sort` function that the page can call.
 
 ```js
