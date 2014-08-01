@@ -4,9 +4,9 @@ Scraping By
 Introduction
 ------------
 
-Downloading webpages may seem unglamorous, but when faced with an uncooperate "open" data source - such as a government site that hides its documents behind redirects and forms, or in a complex HTML document - being able to programmatically scrape a website for data can be a serious time-saver. Sure, it takes a little time to write the scraper itself, but that's far easier (and more interesting) than clicking on hundreds of links manually. Plus, if you ever need that information again, the hard work is done already.
+Downloading webpages may seem unglamorous, but when faced with an uncooperative "open" data source - such as a government site that hides its documents behind redirects and forms - being able to programmatically scrape a website for data can be a serious time-saver. Sure, it takes a little time to write the scraper itself, but that's far easier (and more interesting) than clicking on hundreds of links manually. Plus, if you ever need that information again, the hard work is done already.
 
-Given its rich support for handling many I/O operations simultaneously, and its web-native capabilities, Node makes a great web scraper. Today we'll write a script to process an NTSB search and download all the listed PDF files, even though they're hidden behind a form. 
+Given its rich support for handling many I/O operations simultaneously, and its library support for handling common network tasks, Node makes a great web scraper. Today we'll write a script to process a search page and download all the listed PDF files, even though they're hidden behind a form. 
 
 In This Tutorial
 ----------------
@@ -20,15 +20,14 @@ Here's the scenario for our page scraping, based on an actual script I wrote for
 
 1. The table of contents contains a list of links to various permutations on `document.cfm`, each of which is a page with metadata about the actual file we want
 2. There's no link to the file on the document pages. Instead, there's a hidden input named "src" that contains the file's ID as a URI-encoded path.
-3. When the form is submitted, we get redirected to the file. Luckily, it turns out that the URI-encoded file ID is just a path from the root of the website - if we decoded it and request that URL, we'll get the actual file.
+3. When the form is submitted, we get redirected to the file. Luckily, it turns out that the URI-encoded ID is just a path from the root of the website - if we decode it and request that URL, we'll get the actual PDF file.
 
-As scraping goes, this is frustrating because the information is hidden in forms instead of semantic link tags, but it's not that hard. We'll have to make a series of HTTP requests to get each one:
+As scraping goes, this is frustrating because the information is hidden in forms instead of semantic link tags, but it's not that hard. Downloading each PDF in the table of contents will require three stages of HTTP requests:
 
 1. Request the table of contents, and find all the document pages
 2. Request each document page, look for the hidden input, and decode the file URL from it.
 3. Request the actual file and save it to disk.
 
-With this chain of requests, this is also great practice for Node's asynchronous control flow, which is probably its biggest departure from more traditional, blocking languages like Python.
 
 Finally, Some Code
 ------------------
@@ -64,7 +63,7 @@ Next we're going to make sure there's a directory to hold our downloaded files. 
 if (!fs.existsSync("downloads")) fs.mkdirSync("downloads");
 ```
 
-Everything else in our script is asynchronous, meaning that it requires us to pass in a callback function that gets the results when the operation completes. We start by downloading the table of contents with the `request` library, and feeding the body text into jsdom's `html()` function, which returns a "document" with all the normal browser-like DOM methods. It's complete enough that you can even use jQuery with it, but we're just going to rely on the `querySelectorAll` method instead.
+Everything else in our script is asynchronous, meaning that it requires us to pass in a callback function that gets the results when the operation completes. We start by downloading the table of contents with the `request` library, and feeding the body text into jsdom's `html()` function, which returns a "document" with all the familiar DOM methods. It's complete enough that you can even use jQuery to search it, but we're just going to rely on the `querySelectorAll` method instead.
 
 ```js
 request(tocURL, function(err, response, body) {
@@ -149,6 +148,8 @@ request(tocURL, function(err, response, body) {
   });
 });
 ```
+
+Run this code with `node scraper`, and you should see it work its way through the page list, download the hidden PDF files, and store them in the `downloads/` folder. Piece of cake! All told, we needed a little less than 50 lines of code to grab those files, which can easily be adapted for our next scraping task as well.
 
 Conclusion
 ----------
