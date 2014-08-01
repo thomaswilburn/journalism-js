@@ -3,7 +3,6 @@ var jsdom = require("jsdom");
 var request = require("request");
 
 var fs = require("fs");
-var path = require("path");
 var url = require("url");
 
 var domain = "http://dms.ntsb.gov/";

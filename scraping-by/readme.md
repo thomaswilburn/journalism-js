@@ -38,7 +38,7 @@ After you've run `npm install` to get the dependencies from `package.json` and i
 * `jsdom` - Wraps up an HTML parser with a browser-like interface
 * `request` - Easily makes HTTP requests, including following redirects
 
-We'll also be using the `url`, `path`, and `fs` modules that come with Node. Let's get our dependencies registered, and also set up some URLs strings we'll need later (found by inspecting the source of a few sample ages):
+We'll also be using the `url` and `fs` modules that come with Node. Let's get our dependencies registered, and also set up some URLs strings we'll need later (found by inspecting the source of a few sample ages):
 
 ```js
 var async = require("async");
@@ -46,7 +46,6 @@ var jsdom = require("jsdom");
 var request = require("request");
 
 var fs = require("fs");
-var path = require("path");
 var url = require("url");
 
 //base domain
