@@ -19,4 +19,5 @@ Table of Contents
 ```
 /angular-table-sort - Creating sortable, filtered tables with AngularJS
 /scraping-by - Intro to Node asynchronicity via web scraping
+/sparkline - Simple sparklines as an intro to HTML5 Canvas
 ```

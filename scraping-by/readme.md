@@ -6,7 +6,7 @@ Introduction
 
 Downloading webpages may seem unglamorous, but when faced with an uncooperative "open" data source - such as a government site that hides its documents behind redirects and forms - being able to programmatically scrape a website for data can be a serious time-saver. Sure, it takes a little time to write the scraper itself, but that's far easier (and more interesting) than clicking on hundreds of links manually. Plus, if you ever need that information again, the hard work is done already.
 
-Given its rich support for handling many I/O operations simultaneously, and its library support for handling common network tasks, Node makes a great web scraper. Today we'll write a script to process a search page and download all the listed PDF files, even though they're hidden behind a form. 
+Given its rich support for handling many I/O operations simultaneously, and its library support for handling common network tasks, Node makes a great web crawler. Today we'll write a script to process a search page and download all the listed PDF files, even though they're hidden behind a form. 
 
 In This Tutorial
 ----------------
@@ -32,13 +32,13 @@ As scraping goes, this is frustrating because the information is hidden in forms
 Finally, Some Code
 ------------------
 
-After you've run `npm install` to get the dependencies from `package.json` and install them for this script, you should see the following installed libraries:
+After you've run `npm install` to get the dependencies listed in `package.json` and install them for this tutorial, you should see the following installed libraries:
 
 * `async` - A utility for performing asynchronous operations, such as collection processing
 * `jsdom` - Wraps up an HTML parser with a browser-like interface
 * `request` - Easily makes HTTP requests, including following redirects
 
-We'll also be using the `url` and `fs` modules that come with Node. Let's get our dependencies registered, and also set up some URLs strings we'll need later (found by inspecting the source of a few sample ages):
+We'll also be using the `url` and `fs` modules that come with Node. Let's get our dependencies registered, and also set up some URLs strings we'll need later (found by inspecting the source of a few sample pages):
 
 ```js
 var async = require("async");
@@ -108,7 +108,7 @@ request(page, function(err, response, body) {
 });
 ```
 
-That penultimate line is interesting, because it uses Node's "pipes" to route the download directly to a file on disk. We still pass our async callback function, `c`, to the `request` function as a second parameter - once the download completes, it'll be called to tell the `async.each()` function we're done with that particular item from `links`.
+That penultimate line is interesting, because it uses Node's streams API to route the download directly to a file on disk via `pipe()`. We still pass our async callback function, `c`, to the `request` function as a second parameter - once the download completes, it'll be called to tell the `async.each()` function we're done with that particular item from `links`.
 
 All together, our code looks like this now:
 
