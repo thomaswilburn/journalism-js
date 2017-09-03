@@ -64,7 +64,7 @@ following installed libraries:
 
 -  ``async`` - A utility for performing asynchronous operations, such as
    collection processing
--  ``jsdom`` - Wraps up an HTML parser with a browser-like interface
+-  ``cheerio`` - Wraps up an HTML parser with a jQuery-like interface
 -  ``request`` - Easily makes HTTP requests, including following
    redirects
 
@@ -75,7 +75,7 @@ we'll need later (found by inspecting the source of a few sample pages):
 .. code:: js
 
     var async = require("async");
-    var jsdom = require("jsdom");
+    var cheerio = require("jsdom");
     var request = require("request");
 
     var fs = require("fs");
@@ -96,21 +96,19 @@ synchronous file system operations for it.
 
     if (!fs.existsSync("downloads")) fs.mkdirSync("downloads");
 
-Everything else in our script is asynchronous, meaning that it requires
-us to pass in a callback function that gets the results when the
-operation completes. We start by downloading the table of contents with
-the ``request`` library, and feeding the body text into jsdom's
-``html()`` function, which returns a "document" with all the familiar
-DOM methods. It's complete enough that you can even use jQuery to search
-it, but we're just going to rely on the ``querySelectorAll`` method
-instead.
+Everything else in our script is asynchronous, meaning that it requires us to
+pass in a callback function that gets the results when the operation
+completes. We start by downloading the table of contents with the ``request``
+library, and feeding the body text into Cheerio's factory function, which
+returns a kind of pseudo-jQuery element that we can use to query for
+additional elements.
 
 .. code:: js
 
     request(tocURL, function(err, response, body) {
       //create a document and look for links to "document.cfm"
-      var document = jsdom.html(body);
-      var links = document.querySelectorAll("a[href*='document.cfm']");
+      var $ = cheerio(body);
+      var links = $.find("a[href*='document.cfm']");
       console.log("Found document links: ", links.length);
     });
 
@@ -125,7 +123,7 @@ the last is always a callback to signal completion.
 
 .. code:: js
 
-    async.each(links, function(a, c) {
+    async.each(links.toArray(), function(a, c) {
         //download the page
         var page = url.resolve(searchURL, a.getAttribute("href"));
         console.log("Requesting page:", page);
@@ -144,17 +142,18 @@ itself. This code replaces the call to ``c()`` in the code above:
 .. code:: js
 
     request(page, function(err, response, body) {
-      var document = jsdom.html(body);
+      var $page = cheerio(body);
       //find the hidden input
-      var input = document.querySelector("input[name='src']");
+      var input = $page.find("input[name='src']");
+      
       //if missing, exit early
-      if (!input) return c();
+      if (!input.length) return c();
+      
       //get URL and download the file
-      var download = url.resolve(domain, decodeURIComponent(input.value));
-      var title = a.innerHTML.replace(/\W/g, "");
+      var download = url.resolve(domain, decodeURIComponent(cheerio(input).val()));
+      var title = $a.html().replace(/\W/g, "").slice(0, 60) + "-" + Date.now();
       var output = fs.createWriteStream("downloads/" + title + ".pdf")
       console.log("Downloading file: ", download);
-      //download the file, calling c() when done
       var r = request(download, c).pipe(output);
     });
 
@@ -172,27 +171,28 @@ All together, our code looks like this now:
     console.log("Requesting table of contents");
     request(tocURL, function(err, response, body) {
       //create a document and look for links to "document.cfm"
-      var document = jsdom.html(body);
-      var links = document.querySelectorAll("a[href*='document.cfm']");
+      var $ = cheerio(body);
+      var links = $.find("a[href*='document.cfm']");
       console.log("Found document links: ", links.length);
       
       //process each link asynchronously
-      async.each(links, function(a, c) {
+      async.each(links.toArray(), function(a, c) {
         //download the page
-        var page = url.resolve(searchURL, a.getAttribute("href"));
+        var $a = cheerio(a);
+        var page = url.resolve(searchURL, $a.attr("href"));
         console.log("Requesting page:", page);
         
         request(page, function(err, response, body) {
-          var document = jsdom.html(body);
+          var $page = cheerio(body);
           //find the hidden input
-          var input = document.querySelector("input[name='src']");
+          var input = $page.find("input[name='src']");
           
           //if missing, exit early
-          if (!input) return c();
+          if (!input.length) return c();
           
           //get URL and download the file
-          var download = url.resolve(domain, decodeURIComponent(input.value));
-          var title = a.innerHTML.replace(/\W/g, "");
+          var download = url.resolve(domain, decodeURIComponent(cheerio(input).val()));
+          var title = $a.html().replace(/\W/g, "").slice(0, 60) + "-" + Date.now();
           var output = fs.createWriteStream("downloads/" + title + ".pdf")
           console.log("Downloading file: ", download);
           var r = request(download, c).pipe(output);
@@ -202,6 +202,7 @@ All together, our code looks like this now:
         console.log("All done!");
       });
     });
+
 
 Run this code with ``node scraper``, and you should see it work its way
 through the page list, download the hidden PDF files, and store them in
